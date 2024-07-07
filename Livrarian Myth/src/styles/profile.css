@@ -1,0 +1,11 @@
+
+
+@media screen and (max-width: 400px) {
+  .profile {
+    width: 100vw;
+  }
+
+  .input-field {
+    width: 95%;
+  }
+}

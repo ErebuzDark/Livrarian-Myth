@@ -1,0 +1,10 @@
+.register-from {
+    position: absolute;
+    top: 500%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 0.1px solid black;
+    padding: 3rem;
+    border-radius: 8px;
+    box-shadow: 0.5px 0.5px 1px;
+}
