@@ -11,14 +11,22 @@
     "e": "npx tailwindcss -i ./src/input.css -o ./src/output.css --watch"
   },
   "dependencies": {
+    "@react-email/components": "^0.0.22",
     "animate.css": "^4.1.1",
     "bootstrap": "^5.3.3",
     "events": "^3.3.0",
     "flowbite": "^2.3.0",
     "flowbite-react": "^0.9.0",
+    "nodemailer": "^6.9.14",
     "react": "^18.2.0",
     "react-animate-on-scroll": "^2.1.9",
-    "react-dom": "^18.2.0"
+    "react-code-input": "^3.9.0",
+    "react-copy-to-clipboard": "^5.1.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^5.2.1",
+    "react-share": "^5.1.0",
+    "react-share-social": "^0.1.60",
+    "react-verification-input": "^4.1.2"
   },
   "devDependencies": {
     "@types/bootstrap": "^5.2.10",

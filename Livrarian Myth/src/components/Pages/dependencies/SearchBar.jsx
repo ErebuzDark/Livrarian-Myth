@@ -6,6 +6,10 @@ import { useNavigate } from 'react-router-dom';
 const SearchBar = () => {
     const navigate = useNavigate();
 
+    // For my API
+    const [titleA, setTitleA] = useState('');
+    const [author, setAuthor] = useState('');
+
     // states
     const [search, setSearch] = useState('');
 
@@ -27,6 +31,7 @@ const SearchBar = () => {
         if (search.trim() !== '') {
             navigate(`/searched?book=${search}`);
         }
+      
     }, [search]);
     
     const handleSearch = (e) => {

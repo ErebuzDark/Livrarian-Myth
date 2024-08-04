@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser');
+const nodemailer = require('nodemailer');
 
 const path = require('path');
 const multer = require('multer');
@@ -88,6 +89,25 @@ app.get('/api/bookDetails', (req, res) => {
     } else {
       res.json(results[0]);
     }
+  });
+});
+
+app.get('/api/bookMarkCounts', (req, res) => {
+  const bookName = req.query.bookName;
+  const sql = 'SELECT COUNT(*) AS count FROM tbl_book_marks WHERE book_name = ?';
+  db.query(sql, [bookName], (err, results) => {
+    if (err) {
+      console.error('Error executing query:', err);
+      res.status(500).send('Server error');
+      return;
+    }
+    if (results.length === 0) {
+      res.status(404).send('Book not found');
+    }
+
+    const count = results[0].count;
+    res.json({ count }); 
+
   });
 });
 
@@ -284,6 +304,147 @@ app.post('/api/upload/profile', uploadPic.single('profilePic'), (req, res) => {
     }
   });
 });
+
+//CHanging Password
+const transporter = nodemailer.createTransport({
+  service: 'gmail', 
+  auth: {
+    user: 'rongentica05@gmail.com',
+    pass: 'pilw fwck ezwm bxri'
+  },
+});
+
+const generateVerificationCode = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
+};
+
+app.post('/send-verification-code', async (req, res) => {
+  const { to } = req.body;
+  const code = generateVerificationCode();
+
+  const mailOptions = {
+    from: 'rongentica05@gmail.com',
+    to: to,
+    subject: 'Your Verification Code',
+    text: `Your verification code is ${code}`,
+    html: `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          background-color: #f4f4f4;
+          margin: 0;
+          padding: 0;
+        }
+        .container {
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 20px;
+          background-color: #ffffff;
+          border-radius: 8px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .logo {
+          text-align: center;
+          margin-bottom: 20px;
+        }
+        .logo img {
+          max-width: 100px;
+        }
+        .content {
+          text-align: center;
+        }
+        .content h1 {
+          color: #333333;
+        }
+        .content p {
+          color: #666666;
+        }
+        .code {
+          display: inline-block;
+          font-size: 24px;
+          font-weight: bold;
+          background-color: #333333;
+          color: #ffffff;
+          padding: 10px 20px;
+          border-radius: 4px;
+          margin-top: 20px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="logo">
+        <img src="https://github.com/ErebuzDark/Livrarian-Myth/blob/main/Livrarian%20Myth/src/assets/header-assets/logo.png?raw=true" alt="logo">
+          <h1>LIVRARIAN MYTH</h1>
+        </div>
+        <div class="content">
+          <h1>This is your Change Password verification code</h1>
+          <p>Please use the following code to verify your account:</p>
+          <div class="code">${code}</div>
+          <p>NOTE: If this is not you, just ignore the message.</p>
+        </div>
+        
+      </div>
+    </body>
+    </html>
+  `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ message: 'Email sent successfully', code: code });
+  } catch (error) {
+    console.error('Error sending email:', error);
+    res.status(500).json({ message: 'Error sending email' });
+  }
+});
+
+
+app.post('/change-password', async (req, res) => {
+  const { email, currentPassword, newPassword, verificationCode, sentCode } = req.body;
+
+  if (verificationCode !== sentCode) {
+    return res.status(401).json({message : 'Invalid verification code'});
+  }
+
+  db.query('SELECT * FROM accounts WHERE email = ?', [email], async (err, results) => {
+    if (err) {
+      console.error('Error querying database:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+
+    if (results.length === 0) {
+      return res.status(402).send('User not found');
+    }
+
+    const user = results[0];
+
+    const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!passwordMatch) {
+      return res.status(403).send('Current password is incorrect');
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    db.query('UPDATE accounts SET password = ? WHERE email = ?', [hashedNewPassword, email], (err, results) => {
+      if (err) {
+        console.error('Error updating password:', err);
+        return res.status(500).json({ message: 'Database error' });
+      }
+
+      res.status(200).json({ message: 'Password changed successfully' });
+    });
+  });
+});
+
+// app.listen(port, () => {
+//   console.log(`Server is running on port ${port}`);
+// });
 
 // ADMIN SIDEEEEE
 // uploading new book data

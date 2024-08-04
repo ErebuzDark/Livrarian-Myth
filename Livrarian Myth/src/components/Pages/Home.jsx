@@ -17,7 +17,7 @@ const Home = () => {
             <div className="flex justify-center">
                 <img src={bg} alt="cover" className="w-90% cover"/>
             </div>
-            <h4 className="title-highlights pt-24 text-3xl">Popular Books</h4>
+            <h4 className="title-highlights pt-24 text-3xl">New Books</h4>
             <div className="main-content min-h-screen">
                 <List />
             </div>

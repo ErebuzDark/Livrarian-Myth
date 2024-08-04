@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
@@ -17,6 +17,30 @@ import gk from '../../assets/bookCover.jpeg';
 
 const Login = ({ setIsLoginModalOpen }) => {
     const navigate = useNavigate();
+
+    const [title, setTitle] = useState('');
+    const [author, setAuthor] = useState('');
+    const [books, setBooks] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+  
+    const resultsPerPage = 10; // Set the number of results per page
+  
+    const searchBooks = async (page = 1) => {
+      try {
+        const query = `q=${title}${author ? `+author:${author}` : ''}&page=${page}&limit=${resultsPerPage}`;
+        const response = await axios.get(`https://openlibrary.org/search.json?${query}`);
+        setBooks(response.data.docs);
+        setTotalPages(Math.ceil(response.data.num_found / resultsPerPage));
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+  
+    const handlePageChange = (newPage) => {
+      setCurrentPage(newPage);
+      searchBooks(newPage);
+    };
 
     useEffect(() => {
         const checkAuth = () => {
@@ -68,6 +92,62 @@ const Login = ({ setIsLoginModalOpen }) => {
                 ))}
                 
             </div>
+
+            <div className="flex flex-col items-center">
+      <input
+        type="text"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Search for book title"
+        className="border border-gray-300 rounded-md p-2 m-2 w-80"
+      />
+      <input
+        type="text"
+        value={author}
+        onChange={(e) => setAuthor(e.target.value)}
+        placeholder="Search for author"
+        className="border border-gray-300 rounded-md p-2 m-2 w-80"
+      />
+      <button
+        onClick={() => searchBooks(1)}
+        className="bg-blue-500 text-white p-2 rounded-md m-2"
+      >
+        Search
+      </button>
+      <ul className="list-disc">
+        {books.map((book) => (
+          <li key={book.key} className="my-4 flex items-center">
+            <img
+              src={`http://covers.openlibrary.org/b/olid/${book.cover_edition_key}-M.jpg`}
+              alt={`${book.title} cover`}
+              className="w-20 h-30 mr-4"
+            />
+            <div>
+              <h2 className="text-xl font-bold">{book.title}</h2>
+              <p>{book.author_name ? `by ${book.author_name.join(', ')}` : 'Unknown Author'}</p>
+              {book.first_publish_year && <p>First published in {book.first_publish_year}</p>}
+            </div>
+          </li>
+        ))}
+      </ul>
+      <div className="flex justify-between items-center w-80 mt-4">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className={`p-2 rounded-md ${currentPage === 1 ? 'bg-gray-300' : 'bg-blue-500 text-white'}`}
+        >
+          Previous
+        </button>
+        <span>Page {currentPage} of {totalPages}</span>
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className={`p-2 rounded-md ${currentPage === totalPages ? 'bg-gray-300' : 'bg-blue-500 text-white'}`}
+        >
+          Next
+        </button>
+      </div>
+    </div>
         </div>
     );
 }

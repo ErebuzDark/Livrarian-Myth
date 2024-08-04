@@ -34,8 +34,7 @@ const BookList = () => {
       {data.map((item) => (
         <div className="card" key={item.bookID}>
           <h3 className='book-name'>{item.book_name}</h3>
-          <img className='book-cover' src={`/uploads/${item.book_cover}`} alt="Book Cover" />
-          <p>{item.bookDesc}</p>
+          <img className='book-cover rounded-md' src={`/uploads/${item.book_cover}`} alt="Book Cover" />
         </div>
       ))}
     </div>

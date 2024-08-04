@@ -53,4 +53,9 @@
     .book-name {
         font-size: .9rem;
     }
+
+    .book-cover {
+        width: 14rem;
+        height: 13rem;
+    }
 }

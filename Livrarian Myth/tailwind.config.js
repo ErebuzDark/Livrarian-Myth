@@ -7,7 +7,7 @@ export default {
     extend: {},
   },
   plugins: [
-    require('flowbite/plugin'),  flowbite.plugin()
+    flowbite.plugin()
   ],
 }
 // "./index.html",
